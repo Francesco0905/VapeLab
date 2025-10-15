@@ -25,32 +25,48 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   }
 
   Future<void> _submit() async {
-  if (_formKey.currentState?.validate() ?? false) {
-    final recipe = Recipe(
-      title: _titleCtrl.text.trim(),
-      description: _descCtrl.text.trim(),
-      author: _authorCtrl.text.trim().isEmpty ? 'Anonimo' : _authorCtrl.text.trim(),
-    );
+    if (_formKey.currentState?.validate() ?? false) {
+      final recipe = Recipe(
+        title: _titleCtrl.text.trim(),
+        description: _descCtrl.text.trim(),
+        author: _authorCtrl.text.trim().isEmpty ? 'Anonimo' : _authorCtrl.text.trim(),
+      );
 
-    // Salva la ricetta su Supabase
-    final response = await SupabaseConfig.client
-        .from('recipes') // Nome della tabella
-        .insert(recipe.toMap())
-        .execute();
+      try {
+        // Salva la ricetta su Supabase
+        final response = await SupabaseConfig.client
+            .from('recipes') // Nome della tabella
+            .insert(recipe.toMap())
+            .execute();
 
-    // Controlla se la risposta ha uno status diverso da 201 (creato con successo)
-    if (response.status != 201 || response.data == null) {
-      print('Errore nell\'aggiunta della ricetta: ${response.status}');
-      return;
+        // Controlla se la risposta ha uno stato 201 (creato con successo)
+        if (response.status == 201) {
+          print('Ricetta aggiunta con successo');
+          widget.onAdd(recipe); // Aggiorna la lista locale
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Ricetta aggiunta con successo')),
+          );
+          _titleCtrl.clear();
+          _authorCtrl.clear();
+          _descCtrl.clear();
+        } else {
+          // Gestione di stati diversi da 201
+          print('Errore nell\'aggiunta della ricetta: ${response.status}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Errore nell\'aggiunta della ricetta: ${response.status}')),
+          );
+        }
+      } catch (e) {
+        // Gestione delle eccezioni
+        print('Eccezione durante l\'aggiunta della ricetta: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Errore durante l\'aggiunta della ricetta')),
+        );
+      }
+    } else {
+      print('Validazione del form fallita');
     }
-
-    widget.onAdd(recipe); // Aggiorna la lista locale
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ricetta aggiunta')));
-    _titleCtrl.clear();
-    _authorCtrl.clear();
-    _descCtrl.clear();
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -93,8 +109,17 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                       _descCtrl.clear();
                     }, child: Text('Annulla')),
                     const SizedBox(width: 8),
-                    ElevatedButton(onPressed: _submit, child: Text('Aggiungi')),
-                  ])
+                        ElevatedButton(
+                          onPressed: () {
+                            print(
+                              'Pulsante Aggiungi premuto',
+                            ); // Log per verificare il click
+                            _submit();
+                          },
+                          child: Text('Aggiungi'),
+                        ),
+                      ],
+                    )
                 ]),
               ),
             ),

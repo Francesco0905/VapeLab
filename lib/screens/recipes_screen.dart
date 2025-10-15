@@ -4,6 +4,7 @@ import 'recipe_detail_screen.dart';
 
 class RecipesScreen extends StatelessWidget {
   final ValueNotifier<List<Recipe>> recipesNotifier;
+
   const RecipesScreen({super.key, required this.recipesNotifier});
 
   @override
@@ -11,22 +12,33 @@ class RecipesScreen extends StatelessWidget {
     return ValueListenableBuilder<List<Recipe>>(
       valueListenable: recipesNotifier,
       builder: (context, recipes, _) {
+        // Controlla se la lista delle ricette è vuota
         if (recipes.isEmpty) {
-          return Center(child: Text('Nessuna ricetta ancora. Sii il primo a condividere!'));
+          return Center(
+            child: Text(
+              'Nessuna ricetta ancora. Sii il primo a condividere!',
+              style: Theme.of(context).textTheme.bodyLarge,
+              textAlign: TextAlign.center,
+            ),
+          );
         }
+
+        // Mostra la lista delle ricette
         return ListView.separated(
           padding: const EdgeInsets.all(16),
           itemCount: recipes.length,
-          separatorBuilder: (_, __) => Divider(),
+          separatorBuilder: (_, __) => const Divider(),
           itemBuilder: (context, i) {
-            final r = recipes[i];
+            final recipe = recipes[i];
             return ListTile(
-              title: Text(r.title),
-              subtitle: Text('${r.author} · ${_short(r.description)}'),
-              trailing: Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => RecipeDetailScreen(recipe: r),
-              )),
+              title: Text(recipe.title),
+              subtitle: Text('${recipe.author} · ${_short(recipe.description)}'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => RecipeDetailScreen(recipe: recipe),
+                ),
+              ),
             );
           },
         );
@@ -34,5 +46,8 @@ class RecipesScreen extends StatelessWidget {
     );
   }
 
-  String _short(String s, [int len = 80]) => s.length <= len ? s : '${s.substring(0, len)}…';
+  // Funzione per accorciare il testo della descrizione
+  String _short(String s, [int len = 80]) {
+    return s.length <= len ? s : '${s.substring(0, len)}…';
+  }
 }
