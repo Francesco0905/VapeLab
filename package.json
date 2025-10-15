@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "VapeLab - Community platform for vaping enthusiasts",
   "scripts": {
-    "vercel-build": "flutter build web --release"
+    "vercel-build": "flutter build web --release --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
   },
   "keywords": [
     "vaping",
