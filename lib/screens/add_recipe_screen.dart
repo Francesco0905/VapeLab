@@ -15,6 +15,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   final _titleCtrl = TextEditingController();
   final _authorCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
+  String _selectedType = 'MTL'; // Valore predefinito
+  String? _selectedRatio; // Valore per il secondo dropdown
 
   @override
   void dispose() {
@@ -27,9 +29,13 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   Future<void> _submit() async {
     if (_formKey.currentState?.validate() ?? false) {
       final recipe = Recipe(
-        title: _titleCtrl.text.trim(),
+        name: _titleCtrl.text.trim(),
         description: _descCtrl.text.trim(),
-        author: _authorCtrl.text.trim().isEmpty ? 'Anonimo' : _authorCtrl.text.trim(),
+        author: _authorCtrl.text.trim().isEmpty
+            ? 'Anonimo'
+            : _authorCtrl.text.trim(),
+        type: _selectedType, // Campo obbligatorio
+        ratio: _selectedRatio!, // Aggiunto il campo ratio
       );
 
       try {
@@ -49,11 +55,18 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           _titleCtrl.clear();
           _authorCtrl.clear();
           _descCtrl.clear();
+          setState(() {
+            _selectedRatio = null; // Resetta il dropdown ratio
+          });
         } else {
           // Gestione di stati diversi da 201
           print('Errore nell\'aggiunta della ricetta: ${response.status}');
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Errore nell\'aggiunta della ricetta: ${response.status}')),
+            SnackBar(
+              content: Text(
+                'Errore nell\'aggiunta della ricetta: ${response.status}',
+              ),
+            ),
           );
         }
       } catch (e) {
@@ -80,35 +93,93 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
               padding: const EdgeInsets.all(18.0),
               child: Form(
                 key: _formKey,
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Text('Aggiungi una nuova ricetta', style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _titleCtrl,
-                    decoration: InputDecoration(labelText: 'Titolo'),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Inserisci un titolo' : null,
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _authorCtrl,
-                    decoration: InputDecoration(labelText: 'Autore (opzionale)'),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _descCtrl,
-                    decoration: InputDecoration(labelText: 'Descrizione / ingredienti / note'),
-                    minLines: 3,
-                    maxLines: 6,
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Inserisci una descrizione' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                    TextButton(onPressed: () {
-                      _titleCtrl.clear();
-                      _authorCtrl.clear();
-                      _descCtrl.clear();
-                    }, child: Text('Annulla')),
-                    const SizedBox(width: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Aggiungi una nuova ricetta',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _titleCtrl,
+                      decoration: InputDecoration(labelText: 'Nome'),
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Inserisci un Nome'
+                          : null,
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _authorCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Autore (opzionale)',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _descCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Descrizione / ingredienti / note',
+                      ),
+                      minLines: 3,
+                      maxLines: 6,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Inserisci una descrizione'
+                          : null,
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: _selectedType,
+                      decoration: InputDecoration(labelText: 'Tipo'),
+                      items: ['MTL', 'DTL'].map((type) {
+                        return DropdownMenuItem(
+                          value: type,
+                          child: Text(type),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedType = value!;
+                          _selectedRatio = null; // Resetta il secondo dropdown
+                        });
+                      },
+                      validator: (value) =>
+                          value == null ? 'Seleziona un tipo' : null,
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: _selectedRatio,
+                      decoration: InputDecoration(labelText: 'Rapporto VG/PG'),
+                      items: (_selectedType == 'MTL'
+                              ? ['50/50', '60/40']
+                              : ['70/30', '80/20'])
+                          .map((ratio) {
+                        return DropdownMenuItem(
+                          value: ratio,
+                          child: Text(ratio),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedRatio = value!;
+                        });
+                      },
+                      validator: (value) =>
+                          value == null ? 'Seleziona un rapporto VG/PG' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            _titleCtrl.clear();
+                            _authorCtrl.clear();
+                            _descCtrl.clear();
+                          },
+                          child: Text('Annulla'),
+                        ),
+                        const SizedBox(width: 8),
                         ElevatedButton(
                           onPressed: () {
                             print(
@@ -119,8 +190,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                           child: Text('Aggiungi'),
                         ),
                       ],
-                    )
-                ]),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

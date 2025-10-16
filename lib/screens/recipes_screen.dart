@@ -31,8 +31,10 @@ class RecipesScreen extends StatelessWidget {
           itemBuilder: (context, i) {
             final recipe = recipes[i];
             return ListTile(
-              title: Text(recipe.title),
-              subtitle: Text('${recipe.author} · ${_short(recipe.description)}'),
+              title: Text('${recipe.name} (${recipe.type})'), // Mostra il tipo accanto al nome
+              subtitle: Text(
+                '${recipe.author} · ${_short(recipe.description)} · ${recipe.ratio}',
+              ), // Mostra il rapporto VG/PG
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
