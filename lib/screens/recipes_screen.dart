@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../supabase_config.dart';
 import 'recipe_detail_screen.dart';
-import '../services/recipe_service.dart';
 
 class RecipesScreen extends StatefulWidget {
   final ValueNotifier<List<Recipe>> recipesNotifier;
