@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../supabase_config.dart';
-import '../services/recipe_service.dart';
 import 'package:uuid/uuid.dart';
 
 class AddRecipeScreen extends StatefulWidget {

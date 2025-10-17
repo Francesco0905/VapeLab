@@ -25,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (session != null) {
       setState(() {
         _isAuthenticated = true;
-        _userEmail = session.user?.email;
+        _userEmail = session.user.email;
       });
     }
   }
@@ -129,19 +129,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        final _emailCtrl = TextEditingController();
-        final _passwordCtrl = TextEditingController();
-        final _formKey = GlobalKey<FormState>();
+        final emailCtrl = TextEditingController();
+        final passwordCtrl = TextEditingController();
+        final formKey = GlobalKey<FormState>();
 
         return AlertDialog(
           title: Text('Login'),
           content: Form(
-            key: _formKey,
+            key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextFormField(
-                  controller: _emailCtrl,
+                  controller: emailCtrl,
                   decoration: InputDecoration(labelText: 'Email'),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
@@ -156,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
-                  controller: _passwordCtrl,
+                  controller: passwordCtrl,
                   decoration: InputDecoration(labelText: 'Password'),
                   obscureText: true,
                   validator: (value) {
@@ -176,8 +176,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (_formKey.currentState?.validate() ?? false) {
-                  _login(context, _emailCtrl.text, _passwordCtrl.text);
+                if (formKey.currentState?.validate() ?? false) {
+                  _login(context, emailCtrl.text, passwordCtrl.text);
                 }
               },
               child: Text('Login'),
@@ -192,19 +192,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        final _emailCtrl = TextEditingController();
-        final _passwordCtrl = TextEditingController();
-        final _formKey = GlobalKey<FormState>();
+        final emailCtrl = TextEditingController();
+        final passwordCtrl = TextEditingController();
+        final formKey = GlobalKey<FormState>();
 
         return AlertDialog(
           title: Text('Registrazione'),
           content: Form(
-            key: _formKey,
+            key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextFormField(
-                  controller: _emailCtrl,
+                  controller: emailCtrl,
                   decoration: InputDecoration(labelText: 'Email'),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
@@ -219,7 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
-                  controller: _passwordCtrl,
+                  controller: passwordCtrl,
                   decoration: InputDecoration(labelText: 'Password'),
                   obscureText: true,
                   validator: (value) {
@@ -239,8 +239,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (_formKey.currentState?.validate() ?? false) {
-                  _signup(context, _emailCtrl.text, _passwordCtrl.text);
+                if (formKey.currentState?.validate() ?? false) {
+                  _signup(context, emailCtrl.text, passwordCtrl.text);
                 }
               },
               child: Text('Registrati'),
