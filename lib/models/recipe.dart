@@ -1,37 +1,43 @@
 class Recipe {
-  final String name; // Nome della ricetta
-  final String description; // Descrizione della ricetta
-  final String author; // Autore della ricetta
-  final String type; // Tipo: MTL o DTL
-  final String ratio; // Rapporto VG/PG: 50/50, 70/30, ecc.
+  final String id;
+  final String name;
+  final String description;
+  final String author;
+  final String type;
+  final String ratio;
+  final String userId;
 
   Recipe({
+    required this.id,
     required this.name,
     required this.description,
     required this.author,
     required this.type,
-    required this.ratio, // Campo obbligatorio
+    required this.ratio,
+    required this.userId,
   });
 
-  // Converte una mappa (dati da Supabase) in un oggetto Recipe
   factory Recipe.fromMap(Map<String, dynamic> map) {
     return Recipe(
-      name: map['name'] as String,
-      description: map['description'] as String,
-      author: map['author'] as String,
-      type: map['type'] as String,
-      ratio: map['ratio'] as String, // Nuovo campo
+      id: map['id'] as String? ?? '', // Gestisce il caso in cui 'id' sia null
+      name: map['name'] as String? ?? 'Senza nome',
+      description: map['description'] as String? ?? 'Nessuna descrizione',
+      author: map['author'] as String? ?? 'Anonimo',
+      type: map['type'] as String? ?? 'MTL',
+      ratio: map['ratio'] as String? ?? '50/50',
+      userId: map['user_id'] as String? ?? '', // Gestisce il caso in cui 'user_id' sia null
     );
   }
 
-  // Converte un oggetto Recipe in una mappa (per inviarlo a Supabase)
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'name': name,
       'description': description,
       'author': author,
       'type': type,
-      'ratio': ratio, // Nuovo campo
+      'ratio': ratio,
+      'user_id': userId,
     };
   }
 }

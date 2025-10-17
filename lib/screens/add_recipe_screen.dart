@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../supabase_config.dart';
+import '../services/recipe_service.dart';
+import 'package:uuid/uuid.dart';
 
 class AddRecipeScreen extends StatefulWidget {
   final void Function(Recipe) onAdd;
@@ -27,59 +29,46 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   }
 
   Future<void> _submit() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      final recipe = Recipe(
-        name: _titleCtrl.text.trim(),
-        description: _descCtrl.text.trim(),
-        author: _authorCtrl.text.trim().isEmpty
-            ? 'Anonimo'
-            : _authorCtrl.text.trim(),
-        type: _selectedType, // Campo obbligatorio
-        ratio: _selectedRatio!, // Aggiunto il campo ratio
+  final userId = SupabaseConfig.client.auth.currentUser?.id;
+
+  if (userId == null) {
+    print('Utente non autenticato');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Devi essere autenticato per aggiungere una ricetta')),
+    );
+    return;
+  } 
+  final uuid = Uuid();
+  if (_formKey.currentState?.validate() ?? false) {
+    final recipe = Recipe(
+      id: uuid.v4(), // L'ID sarà generato automaticamente da Supabase
+      name: _titleCtrl.text.trim(),
+      description: _descCtrl.text.trim(),
+      author: _authorCtrl.text.trim().isEmpty ? 'Anonimo' : _authorCtrl.text.trim(),
+      type: _selectedType,
+      ratio: _selectedRatio!,
+      userId: userId, // Associa la ricetta all'utente autenticato
+    );
+
+    final response = await SupabaseConfig.client
+        .from('recipes')
+        .insert(recipe.toMap())
+        .execute();
+
+    if (response.status == 201) {
+      print('Ricetta aggiunta con successo');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ricetta aggiunta con successo')),
       );
-
-      try {
-        // Salva la ricetta su Supabase
-        final response = await SupabaseConfig.client
-            .from('recipes') // Nome della tabella
-            .insert(recipe.toMap())
-            .execute();
-
-        // Controlla se la risposta ha uno stato 201 (creato con successo)
-        if (response.status == 201) {
-          print('Ricetta aggiunta con successo');
-          widget.onAdd(recipe); // Aggiorna la lista locale
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Ricetta aggiunta con successo')),
-          );
-          _titleCtrl.clear();
-          _authorCtrl.clear();
-          _descCtrl.clear();
-          setState(() {
-            _selectedRatio = null; // Resetta il dropdown ratio
-          });
-        } else {
-          // Gestione di stati diversi da 201
-          print('Errore nell\'aggiunta della ricetta: ${response.status}');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Errore nell\'aggiunta della ricetta: ${response.status}',
-              ),
-            ),
-          );
-        }
-      } catch (e) {
-        // Gestione delle eccezioni
-        print('Eccezione durante l\'aggiunta della ricetta: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Errore durante l\'aggiunta della ricetta')),
-        );
-      }
+      Navigator.of(context).pop(); // Torna indietro dopo l'aggiunta
     } else {
-      print('Validazione del form fallita');
+      print('Errore nell\'aggiunta della ricetta: ${response.status}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Errore nell\'aggiunta della ricetta')),
+      );
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +118,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _selectedType,
+                      initialValue: _selectedType,
                       decoration: InputDecoration(labelText: 'Tipo'),
                       items: ['MTL', 'DTL'].map((type) {
                         return DropdownMenuItem(
@@ -148,7 +137,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _selectedRatio,
+                      initialValue: _selectedRatio,
                       decoration: InputDecoration(labelText: 'Rapporto VG/PG'),
                       items: (_selectedType == 'MTL'
                               ? ['50/50', '60/40']
