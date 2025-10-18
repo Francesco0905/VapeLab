@@ -4,6 +4,7 @@ import 'home_screen.dart';
 import 'recipes_screen.dart';
 import 'add_recipe_screen.dart';
 import 'profile_screen.dart';
+import 'explore_screen.dart';
 
 class RootPage extends StatefulWidget {
   final ValueNotifier<List<Recipe>> recipesNotifier;
@@ -21,6 +22,7 @@ class _RootPageState extends State<RootPage> {
     'Ricette',
     'Aggiungi',
     'Profilo',
+    'Esplora',
   ];
 
   void _navigateTo(int index) {
@@ -45,11 +47,32 @@ class _RootPageState extends State<RootPage> {
               selectedIndex: _selectedIndex,
               onDestinationSelected: _navigateTo,
               labelType: NavigationRailLabelType.all,
-              destinations: const [
-                NavigationRailDestination(icon: Icon(Icons.home), label: Text('Home')),
-                NavigationRailDestination(icon: Icon(Icons.list), label: Text('Ricette')),
-                NavigationRailDestination(icon: Icon(Icons.add), label: Text('Aggiungi')),
-                NavigationRailDestination(icon: Icon(Icons.person), label: Text('Profilo')),
+              destinations: [
+                NavigationRailDestination(
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home),
+                  label: Text('Home'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.list_alt_outlined),
+                  selectedIcon: Icon(Icons.list_alt),
+                  label: Text('Ricette'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.add_outlined),
+                  selectedIcon: Icon(Icons.add),
+                  label: Text('Aggiungi'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.person_outline),
+                  selectedIcon: Icon(Icons.person),
+                  label: Text('Profilo'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.explore_outlined),
+                  selectedIcon: Icon(Icons.explore),
+                  label: Text('Esplora'),
+                ),
               ],
             ),
           Expanded(child: _buildBody()),
@@ -98,6 +121,15 @@ class _RootPageState extends State<RootPage> {
             Navigator.of(context).pop();
           },
         ),
+        ListTile(
+          leading: Icon(Icons.explore),
+          title: Text('Esplora'),
+          selected: _selectedIndex == 4,
+          onTap: () {
+            _navigateTo(4);
+            Navigator.of(context).pop();
+          },
+        ),
       ],
     );
   }
@@ -113,8 +145,10 @@ class _RootPageState extends State<RootPage> {
           onAdd: (r) => widget.recipesNotifier.value = [...widget.recipesNotifier.value, r],
         );
       case 3:
-      default:
         return ProfileScreen();
+      case 4:
+      default:
+        return ExploreScreen(onNavigate: _navigateTo);
     }
   }
 }
